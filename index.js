@@ -1,68 +1,78 @@
-module.exports = () => {
-  // ...
+const fs = require("fs");
+const chalk = require("chalk");
+//const path = require('path');
+const fetch = require("node-fetch");
+
+//Obtener links en un array
+const linksMd = (data) => {
+  //return new Promise((resolve) => {
+  const expression = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+  const regEx = new RegExp(expression);
+  const links = data.match(regEx);//match()	Devuelve un arreglo que contiene todas las coincidencias, incluidos los grupos de captura, o null si no se encuentra ninguna coincidencia.
+
+  for (let x = 0; x < links.length; x++) {
+    links[x] = links[x].replace(/[(),"]+/g, "");
+  }
+  console.log(links);
+  //resolve(links);
+  //})
+  const promises = links.map((link) => validateLink(link)); // esto produce un arreglo de promesas
+  linksAndStatus(promises);
+  LinkStats(promises);
 };
 
-// Desde este archivo debes exportar una función (mdLinks).
+// impimir link y status
+const linksAndStatus = (promises) => {
+  Promise.all(promises) // el promise.all recibe como argumento un arreglo de promesas
+    //.then(result => console.log(result)); // el resultado de cada promesas [{ state: 'OK'}, { state: 'OK'}, { state: 'OK'}, ...]
+    .then((result) => {// recorre arreglo de promesas
+        result.map((res) => {
+        if (res.status === "OK") {
+          console.log(`${chalk.blue(res.href)} ${" "} ${chalk.bgBlue(res.status)}`);
+        } else {
+          console.log(`${chalk.red(res.href)} ${" "} ${chalk.bgRed(res.status)}`);
+        }
+      }) 
+    });
+}
 
-// const mdLinks = (path, options) => {   
-// };
+//total de links, numero de fallido y numero de ok
+const LinkStats = (promises) => {
+  // eslint-disable-next-line no-undef
+  Promise.all(promises)
+  .then((result) => {
+    const totalLinks = result.length;//links totales
+    let counterOk = 0;
+    let counterFail = 0;
+    result.map((res) => {
+      if (res.status === "OK") {
+        counterOk++;
+      } else {
+        counterFail++;
+      }
+    });
+    console.log(`${chalk.bgCyan('Total: ')}${chalk.cyan(totalLinks)}`);
+    console.log(`${chalk.bgCyan('OK: ')}${chalk.cyan(counterOk)}`);
+    console.log(`${chalk.bgCyan('FAIL: ')}${chalk.cyan(counterFail)}`);
+  });
+};
 
-// leer archivo md
-const fs = require('fs'); 
 
-/* fs.readFile('README.md', 'utf-8', (error, data) => {
-  if(error) {
-    console.log('error: ', error);
-  } else {
-    console.log(data);
-  }
-});
+//status links
+const validateLink = (url) =>
+  fetch(url)
+    .then((response) => {
+      return { href: url, status: response.ok ? "OK" : "FAIL" };
+    })
+    .catch((err) => {
+      // console.log('Este link esta roto: ', err );
+      return { href: url, status: "FAIL" };
+    });
 
-let path = require ('path');
-console.log(path.extname('README.md'));
-
-fs.readdir('./test', (error, data) => {
-  if(error){
-    onerror(error);
-    return;
-  }
-  console.log(data);
-}); */
-
-// leer archivos de un directorio
-let readMe = fs.readFileSync('./README.md', {encoding: 'utf-8'}); // path ruta donde se encuentra nuestro archivo
-console.log(readMe);
-
-/* console.log('iniciando lectura');
- //listar archivos de un directorio
- let files = fs.readdirSync('.'); //se ejecuta de forma sincrona
- // cualquier codigo que este despues de esa linea va a esperar hasta la
- // lectura del archivo
- console.log('finalizando lectura');
- console.log(files); */
-
- 
- //listar archivos de un directorio
- fs.readdir('.', (error, files) => {//se ejecuta de forma asincrona
-  if(error) {
-      throw error 
-  }
-  console.log('finalizando lectura');
-  console.log(files);
- }); 
-  console.log('iniciando lectura');
- 
-// path module (root, dir, base, ext, name) 
-const path = require ('path');
-
-let pathObj = path.parse(__filename); 
-console.log(pathObj); 
-
-/* let paginaInicio = '\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links\\README.md';
-console.log(path.normalize(paginaInicio));
-console.log(path.dirname(paginaInicio));// nombre de directorio
-console.log(path.basename(paginaInicio));// nombre de la base
-console.log(path.extname(paginaInicio)); // nombre de la extension */
-
-console.log(__dirname);// trayectoria del archivo
-console.log(__filename);// con nombre del archivo
+//leer un archivo md funciona
+const readFileMd = (doc) => {
+  const data = fs.readFileSync(doc, "utf-8");
+  console.log(chalk.magentaBright(data));
+  linksMd(data);
+};
+readFileMd("README.md");
