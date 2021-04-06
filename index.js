@@ -1,78 +1,127 @@
 const fs = require("fs");
 const chalk = require("chalk");
-//const path = require('path');
+const path = require("path");
 const fetch = require("node-fetch");
+const marked = require("marked");
+
 
 //Obtener links en un array
-const linksMd = (data) => {
-  //return new Promise((resolve) => {
-  const expression = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
-  const regEx = new RegExp(expression);
-  const links = data.match(regEx);//match()	Devuelve un arreglo que contiene todas las coincidencias, incluidos los grupos de captura, o null si no se encuentra ninguna coincidencia.
+const linksMd = (doc, data) => {
+  // console.log(chalk.bgRed( 'Obtener links en un array'));
+  let dirmd = path.dirname(__filename);
+  // let filemd = path.basename(__filename);
+  let arrLinks = [];
 
-  for (let x = 0; x < links.length; x++) {
-    links[x] = links[x].replace(/[(),"]+/g, "");
-  }
-  console.log(links);
-  //resolve(links);
-  //})
-  const promises = links.map((link) => validateLink(link)); // esto produce un arreglo de promesas
-  linksAndStatus(promises);
-  LinkStats(promises);
+  const renderer = new marked.Renderer();
+  renderer.link = (href, path, text) => {
+    //if (href.charAt(0) !== "#") { //ignora el caracter en el indice 0 = # "si no es igual" sube
+      arrLinks.push({
+        href: href,
+        text: text,
+        //file: filemd,
+        file: doc,
+        path: dirmd,
+      });
+    //}
+  };
+  marked(data, { renderer: renderer });
+
+  return arrLinks;
+  // console.log(arrLinks);// objeto x link
+  // return validateLink(arrLinks);
+ // linkStats(arrLinks);
 };
 
-// impimir link y status
-const linksAndStatus = (promises) => {
-  Promise.all(promises) // el promise.all recibe como argumento un arreglo de promesas
-    //.then(result => console.log(result)); // el resultado de cada promesas [{ state: 'OK'}, { state: 'OK'}, { state: 'OK'}, ...]
-    .then((result) => {// recorre arreglo de promesas
-        result.map((res) => {
-        if (res.status === "OK") {
-          console.log(`${chalk.blue(res.href)} ${" "} ${chalk.bgBlue(res.status)}`);
-        } else {
-          console.log(`${chalk.red(res.href)} ${" "} ${chalk.bgRed(res.status)}`);
+
+//validar el array de objetos de links
+const validateLink = (arrLinks) => {
+  // console.log(arrLinks); lee correctamente
+  console.log(chalk.bgCyan( 'validar el arreglo de objetos (links)'));
+  const promises = arrLinks.map(link => {// esto produce un arreglo de promesas
+    return fetch(link)
+      .then((response) => {
+        if(response.status){
+            return {
+                href: link.href,
+                text: link.text,
+                file: link.file,
+                path: link.path,
+                status: response.status,
+                statusText: response.statusText
+            };
+        } else{
+            return {
+                href: link.href,
+                text: link.text,
+                file: link.file,
+                path: link.path,
+                status: response.status,
+                statusText: 'FAIL'
+            }
         }
-      }) 
-    });
-}
+      })
+      .catch((err) => {
+        // console.log('Este link esta roto: ', err );
+        return {
+            href: link.href,
+            text: link.text,
+            file: link.file,
+            path: link.path,
+            status: undefined,
+            statusText: 'FAIL'
+        }
+      });
+  });
+  return Promise.all(promises)// el promise.all recibe como argumento un arreglo de promesas
+  //.then(result => console.log(result))// el resultado de cada promesas [{ state: 'OK'}, { state: 'OK'}, { state: 'OK'}, ...]
+};
 
 //total de links, numero de fallido y numero de ok
-const LinkStats = (promises) => {
-  // eslint-disable-next-line no-undef
-  Promise.all(promises)
-  .then((result) => {
-    const totalLinks = result.length;//links totales
-    let counterOk = 0;
-    let counterFail = 0;
-    result.map((res) => {
-      if (res.status === "OK") {
-        counterOk++;
-      } else {
-        counterFail++;
-      }
-    });
-    console.log(`${chalk.bgCyan('Total: ')}${chalk.cyan(totalLinks)}`);
-    console.log(`${chalk.bgCyan('OK: ')}${chalk.cyan(counterOk)}`);
-    console.log(`${chalk.bgCyan('FAIL: ')}${chalk.cyan(counterFail)}`);
-  });
+const linkStats = (arrObjLinks) => {
+  //console.log('Hola!!!'+ arrObjLinks);//lo realiza antesdel validate
+  // const arrayLinks = arrObjLinks.length;
+  // const totalLinks = `Total: ${arrayLinks}`;
+  // console.log(chalk.bgGreen(totalLinks));
+ let fails = [];
+ let oks = [];
+ let total = [];
+ let resultLinks = {};
+ arrObjLinks.forEach((element) => {
+   total.push(element);
+   if(element.statusText === 'OK') {
+     oks.push(element);
+   } else if (element.statusText === 'FAIL'){
+     fails.push(element);
+   }
+ });
+  resultLinks = {
+    Total: total.length,
+    Unique: oks.length,
+    Broken: fails.length,
+  }
+  console.log(resultLinks);
+  //return resultLinks;
 };
 
 
-//status links
-const validateLink = (url) =>
-  fetch(url)
-    .then((response) => {
-      return { href: url, status: response.ok ? "OK" : "FAIL" };
-    })
-    .catch((err) => {
-      // console.log('Este link esta roto: ', err );
-      return { href: url, status: "FAIL" };
-    });
-
-//leer un archivo md funciona
+//leer un archivo md
 const readFileMd = (doc) => {
   const data = fs.readFileSync(doc, "utf-8");
   console.log(chalk.magentaBright(data));
-  linksMd(data);
+  const links = linksMd(doc, data)
+  validateLink(links)
+    .then(result => {
+      console.log(result)
+      linkStats(result)
+    })
 };
+
 readFileMd("README.md");
+
+
+module.exports = {
+  readFileMd,
+  linksMd,
+  validateLink,
+  linkStats,
+}
