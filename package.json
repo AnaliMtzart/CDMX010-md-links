@@ -2,8 +2,7 @@
   "name": "md-links",
   "version": "0.1.0",
   "scripts": {
-    "test": "jest --watchAll",
-    "test:coverage": "jest --coverage"
+    "test": "jest --watchAll --coverage"
     
   },
   "dependencies": {
