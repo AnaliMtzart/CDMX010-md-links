@@ -143,4 +143,6 @@ module.exports = {
   readFileMdValidate,
   readFileMdStats,
   validateLink,
+  linkStats,
+  linksMd,
 }
