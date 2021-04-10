@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "scripts": {
     "test": "jest --watchAll --coverage"
-    
   },
   "dependencies": {
     "chalk": "^4.1.0",

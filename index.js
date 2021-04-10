@@ -13,8 +13,7 @@ if(process.argv[3] === 'stats' || process.argv[4] === 'stats'){
 }
    
 // console.log(optionsMd.validate)
-//     console.log(optionsMd.stats);
-
+// console.log(optionsMd.stats);
 
 if(optionsMd.validate === 'validate') {
     readFileMdValidate(path);
@@ -22,17 +21,3 @@ if(optionsMd.validate === 'validate') {
 if(optionsMd.stats === 'stats'){
     readFileMdStats(path);
 }
-
-    // switch(optionsMd){
-    //     case('validate'):
-    //         //console.log(print('Validar los links'));
-    //         readFileMd(doc);
-    //         break;
-    //     case('stats'):
-    //         //console.log(print('Generar estadistica'));
-    //         linkStats();
-    //         break;
-    //     default:
-    //         console.log('Errrorrrrrrrr');
-    // }
-
