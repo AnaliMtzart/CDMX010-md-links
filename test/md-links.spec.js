@@ -1,5 +1,8 @@
-const { validateLink, linkStats, linksMd, readFileMdValidate, readFileMdStats, data } = require ('../mdLinks.js');
+/* eslint-disable no-undef */
+/* eslint-disable linebreak-style */
 
+const { readValidate, readStats, validateLink, linkStats, 
+  htmlLinks, readFile, searchMd } = require('../mdLinks.js');
 
 const exampleValidate = [
   {
@@ -7,15 +10,14 @@ const exampleValidate = [
     text: 'Asíncronía en js',
     file: 'README.md',
     path: 'C:\\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links',
-      
   },
   {
     href: '#8-pistas-tips-y-lecturas-complementarias',
     text: '8. Pistas, tips y lecturas complementarias',
     file: 'README.md',
     path: 'C:\\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links',
-  }
-]
+  },
+];
 
 const resultValidate = [
   {
@@ -24,9 +26,9 @@ const resultValidate = [
     file: 'README.md',
     path: 'C:\\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links',
     status: 200,
-    statusText: 'OK'
+    statusText: 'OK',
     // status: 404,
-    // statusText: 'FAIL'
+    // statusText: 'FAIL',
   },
   {
     href: '#8-pistas-tips-y-lecturas-complementarias',
@@ -34,21 +36,17 @@ const resultValidate = [
     file: 'README.md',
     path: 'C:\\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links',
     status: 404,
-    statusText: 'FAIL'
-  }
-]
+    statusText: 'FAIL',
+  },
+];
 
-const exampleDoc = 'README.md';
+const exampleFile = [ { file: 'prueba\\prueba.md' } ];
 
-const exampleText = `## 1. Preámbulo
+const exampleRoute = 'prueba\\prueba.md';
 
-[Markdown](https://es.wikipedia.org/wiki/Markdown) es un lenguaje de marcado
-ligero muy popular entre developers. Es usado en muchísimas plataformas que
-manejan texto plano (GitHub, foros, blogs, ...), y es muy común
-encontrar varios archivos en ese formato en cualquier tipo de repositorio
-(empezando por el tradicional)`;
+const resultRead = '[Markdown](https://es.wikipedia.org/wiki/Markdown)';
 
-
+const exampleRouteS = './prueba';
 
 describe('validateLink', () => {
   it('validateLink debería ser una función', () => {
@@ -56,14 +54,12 @@ describe('validateLink', () => {
   });
 
   it('deberia retornar un arreglo de objetos que contienen las claves status y statusText', (done) => {
-    validateLink(exampleValidate)
-      .then(expected => {
-        expect(resultValidate).toEqual(expect.arrayContaining(expected));
-        done();
-      })
-  })
+    validateLink(exampleValidate).then((expected) => {
+      expect(resultValidate).toEqual(expect.arrayContaining(expected));
+      done();
+    });
+  });
 });
-
 
 describe('linkStats', () => {
   it('linkStats debería ser una función', () => {
@@ -71,38 +67,55 @@ describe('linkStats', () => {
   });
 
   it('deberia retornar un objeto que contenga total, unique y broken', () => {
-    expect(linkStats(resultValidate)).toEqual({ Total: 2, Unique: 1, Broken: 1 });
-  })
+    expect(linkStats(resultValidate)).toEqual([ { Total: 2, Ok: 1, Unique: 2, Broken: 1 } ]);
+  });
 });
 
-
-describe('linksMd', () => {
-  it('linksMd debería ser una función', () => {
-    expect(typeof linksMd).toBe('function');
+describe('htmlLinks', () => {
+  it('htmlLinks debería ser una función', () => {
+    expect(typeof htmlLinks).toBe('function');
   });
 
-  it('deberia retornar un array con objeto que contenga info del link dentro del doc md', () => {
-    expect(linksMd(exampleDoc, exampleText)).toEqual([
+  it('htmlLinks deberia retornar un array con objeto que contenga info del link dentro del doc md', () => {
+    expect(htmlLinks(exampleFile)).toEqual([
       {
         href: 'https://es.wikipedia.org/wiki/Markdown',
         text: 'Markdown',
-        file: 'README.md',
-        path: 'C:\\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links',  
-      }
+        file: 'prueba\\prueba.md',
+        path: 'C:\\Users\\Anali\\Developer\\Laboratoria\\CDMX010-md-links',
+      },
     ]);
-  })
-});
-
-
-describe('readFileMdValidate', () => {
-  it('readFileMdValidate debería ser una función', () => {
-    expect(typeof readFileMdValidate).toBe('function');
   });
 });
 
+describe('readValidate', () => {
+  it('readValidate debería ser una función', () => {
+    expect(typeof readValidate).toBe('function');
+  });
+});
 
-describe('readFileMdStats', () => {
+describe('readStats', () => {
   it('readFileMdStats debería ser una función', () => {
-    expect(typeof readFileMdStats).toBe('function');
+    expect(typeof readStats).toBe('function');
+  });
+});
+
+describe('searchMd', () => {
+  it('searchMd debería ser una función', () => {
+    expect(typeof searchMd).toBe('function');
+  });
+
+  it('searchMd deberia retornar un array con un objeto de file', () => {
+    expect(searchMd(exampleRouteS)).toEqual(exampleFile);
+  });
+});
+
+describe('readFile', () => {
+  it('readFile debería ser una función', () => {
+    expect(typeof readFile).toBe('function');
+  });
+
+  it('readFile deberia retornar el contenido del archivo', () => {
+    expect(readFile(exampleRoute)).toEqual(resultRead);
   });
 });

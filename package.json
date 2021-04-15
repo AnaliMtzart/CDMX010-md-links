@@ -9,5 +9,33 @@
     "jest": "^26.6.3",
     "marked": "^2.0.1",
     "node-fetch": "^2.6.1"
-  }
+  },
+  "description": "Libreria para leer archivos md, extraer links y verificar su estado",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnaliMtzart/CDMX010-md-links.git"
+  },
+  "keywords": [
+    "md",
+    "markdown",
+    "node.js",
+    "links",
+    "validate",
+    "stats"
+  ],
+  "author": "Anali Martínez Arózqueta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AnaliMtzart/CDMX010-md-links/issues"
+  },
+  "homepage": "https://github.com/AnaliMtzart/CDMX010-md-links#readme"
 }
